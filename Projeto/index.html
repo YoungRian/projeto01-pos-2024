@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Produtos Variaveis</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Font Awesome icons (free version)-->
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body id="page-top">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand" href="#page-top">Produtos Variaveis</a>
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="#start">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#products">Projects</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact">Contatos</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Masthead-->
+        <header class="masthead" id="start">
+            <div class="container px-4 px-lg-5 d-flex h-100 align-items-center justify-content-center">
+                <div class="d-flex justify-content-center">
+                    <div class="text-center">
+                        <h1 class="mx-auto my-0 text-uppercase">Produtos Variaveis</h1>
+                        <h2 class="text-white-50 mx-auto mt-2 mb-5">Site de produtos variaveis, dos melhores gostos.</h2>
+                        <a class="btn btn-primary" href="#products">Ver Produtos</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Products-->
+        <section class="projects-section bg-light" id="products">
+            <div class="container px-4 px-lg-5">
+                <h2 class="text-center">Lista de Produtos</h2>
+                
+                <div class="d-grid gap-2 col-6 mx-auto my-4">
+                    <button id="load-products-btn" class="btn btn-primary btn-lg">Carregar Produtos</button>
+                </div>
+                
+                <!-- Accordion para a lista de produtos -->
+                <div class="accordion mt-4" id="product-accordion"></div>
+            </div>
+        </section>
+
+        <!-- Código JavaScript -->
+        <script>
+            // Função para carregar os produtos usando async/await
+            async function loadProducts() {
+                try {
+                    const url = 'https://fakestoreapi.com/products';
+                    const response = await fetch(url);
+                    const products = await response.json();
+
+                    const productAccordion = document.getElementById('product-accordion');
+                    productAccordion.innerHTML = ''; // Limpa o accordion anterior
+
+                    products.forEach((product, index) => {
+                        const accordionItem = document.createElement('div');
+                        accordionItem.className = 'accordion-item';
+                        
+                        accordionItem.innerHTML = `
+                            <h2 class="accordion-header" id="heading-${index}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${index}" aria-expanded="false" aria-controls="collapse-${index}">
+                                    <div class="text-center">
+                                        <img src="${product.image}" alt="${product.title}" class="img-fluid" style="max-width: 200px;">
+                                    </div>
+                                    Produto: ${product.title} - $${product.price}
+                                </button>
+                            </h2>
+                            <div id="collapse-${index}" class="accordion-collapse collapse" aria-labelledby="heading-${index}" data-bs-parent="#product-accordion">
+                                <div class="accordion-body" id="product-details-${index}">
+                                    <div class="text-center">Carregando detalhes...</div>
+                                </div>
+                            </div>
+                        `;
+                        productAccordion.appendChild(accordionItem);
+
+                        // Adiciona evento de clique para carregar detalhes do produto
+                        accordionItem.querySelector('.accordion-button').addEventListener('click', () => {
+                            const detailsElement = document.getElementById(`product-details-${index}`);
+                            if (!detailsElement.classList.contains('loaded')) {
+                                loadProductDetails(product.id, index); // Carrega os detalhes apenas uma vez
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Erro ao buscar os produtos:', error);
+                    alert('Não foi possível carregar os produtos.');
+                }
+            }
+
+            // Função para carregar os detalhes de um produto específico
+            async function loadProductDetails(productId, index) {
+                try {
+                    const url = `https://fakestoreapi.com/products/${productId}`;
+                    const response = await fetch(url);
+                    const product = await response.json();
+
+                    const productDetails = document.getElementById(`product-details-${index}`);
+                    productDetails.innerHTML = `
+                        <p><strong>Nome:</strong> ${product.title}</p>
+                        <p><strong>Categoria:</strong> ${product.category}</p>
+                        <p><strong>Descrição:</strong> ${product.description}</p>
+                        <p><strong>Preço:</strong> $${product.price}</p>
+                        <p><strong>Avaliação:</strong> ${product.rating.rate} (${product.rating.count} avaliações)</p>
+                    `;
+                    productDetails.classList.add('loaded');
+
+                } catch (error) {
+                    console.error('Erro ao carregar os detalhes do produto:', error);
+                    alert('Não foi possível carregar os detalhes do produto.');
+                }
+            }
+
+            // Adiciona evento de clique para carregar os produtos
+            document.getElementById('load-products-btn').addEventListener('click', loadProducts);
+        </script>
+        <!-- Contact-->
+        <section class="contact-section bg-black" id="contact">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card py-4 h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-map-marked-alt text-primary mb-2"></i>
+                                <h4 class="text-uppercase m-0">Localização</h4>
+                                <hr class="my-4 mx-auto" />
+                                <div class="small text-black-50">IFRN - SPP</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card py-4 h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-envelope text-primary mb-2"></i>
+                                <h4 class="text-uppercase m-0">Email</h4>
+                                <hr class="my-4 mx-auto" />
+                                <div class="small text-black-50"><a href="#!">jdsnrian01@gmail.com</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card py-4 h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-mobile-alt text-primary mb-2"></i>
+                                <h4 class="text-uppercase m-0">Telefone</h4>
+                                <hr class="my-4 mx-auto" />
+                                <div class="small text-black-50">+55 84 9 9649-5275</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="social d-flex justify-content-center">
+                    <a class="mx-2" href="https://x.com/AkaYoungRian?t=7ojvTxtGUJMXRyYUZG13cg&s=08"><i class="fab fa-twitter"></i></a>
+                    <a class="mx-2" href="https://www.facebook.com/share/nABnEC285yLq4pDL/"><i class="fab fa-facebook-f"></i></a>
+                    <a class="mx-2" href="https://github.com/YoungRian"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="footer bg-black small text-center text-white-50"><div class="container px-4 px-lg-5">Copyright &copy;JR Website 2024</div></footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <!-- * *                               SB Forms JS                               * *-->
+        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
+    </body>
+</html>
